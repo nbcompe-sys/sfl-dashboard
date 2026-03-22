@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌻 Mineroboy — Farm Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f5c518;--gold2:#c9960a;--green:#4caf50;--gd:#2e7d32;--bg:#0b1a05;--panel:#0f1e08;--panel2:#162509;--border:#2a4a10;--text:#e8f5d0;--muted:#7a9a5a;--red:#e53935;--orange:#ff9800;--blue:#42a5f5;--purple:#ab47bc}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse at 0 0,rgba(76,175,80,.08) 0,transparent 50%),radial-gradient(ellipse at 100% 100%,rgba(245,197,24,.05) 0,transparent 50%)}
+nav{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Press Start 2P',monospace;font-size:.6rem;color:var(--gold);text-shadow:0 0 12px rgba(245,197,24,.4)}
+.nav-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sbadge{font-size:.7rem;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
+.sbadge.live{color:#a5d6a7;border-color:rgba(76,175,80,.3);background:rgba(76,175,80,.08)}
+.sbadge.err{color:#ef9a9a;border-color:rgba(229,57,53,.3)}
+.tabs{display:flex;overflow-x:auto;background:var(--panel);border-bottom:1px solid var(--border);padding:0 12px}
+.tab{padding:10px 16px;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;user-select:none}
+.tab:hover{color:var(--text)}.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+main{padding:14px;max-width:1400px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.full{grid-column:1/-1}
+.section{display:none}.section.active{display:block}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ch{background:var(--panel2);border-bottom:1px solid var(--border);padding:9px 14px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);display:flex;align-items:center;justify-content:space-between}
+.cb{padding:12px 14px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.83rem}
+.row:last-child{border:none}.rl{color:var(--muted)}.rv{font-weight:700}
+.gold{color:var(--gold)}.grn{color:#a5d6a7}.red{color:#ef9a9a}.ora{color:#ffcc80}.blu{color:#90caf9}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.67rem;font-weight:800}
+.bok{background:rgba(76,175,80,.18);color:#a5d6a7;border:1px solid rgba(76,175,80,.3)}
+.bwarn{background:rgba(255,152,0,.18);color:#ffcc80;border:1px solid rgba(255,152,0,.3)}
+.bbad{background:rgba(229,57,53,.18);color:#ef9a9a;border:1px solid rgba(229,57,53,.3)}
+.binfo{background:rgba(66,165,245,.18);color:#90caf9;border:1px solid rgba(66,165,245,.3)}
+.bgold{background:rgba(245,197,24,.12);color:var(--gold);border:1px solid rgba(245,197,24,.25)}
+.al{display:flex;gap:8px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.5}
+.al:last-child{margin-bottom:0}
+.al-ok{background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.2)}
+.al-w{background:rgba(255,152,0,.1);border:1px solid rgba(255,152,0,.2)}
+.al-b{background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.2)}
+.al-i{background:rgba(66,165,245,.08);border:1px solid rgba(66,165,245,.15)}
+.pb{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin:3px 0}
+.pf{height:100%;border-radius:3px;transition:width .5s}
+.pf-gold{background:linear-gradient(90deg,var(--gold2),var(--gold))}
+.pf-grn{background:linear-gradient(90deg,var(--gd),var(--green))}
+.pf-red{background:linear-gradient(90deg,#b71c1c,var(--red))}
+.pf-blu{background:linear-gradient(90deg,#1565c0,var(--blue))}
+.ti{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
+.ti:last-child{border:none}.tw{flex:1}
+.th{display:flex;justify-content:space-between;margin-bottom:3px;font-size:.78rem}
+.tt{font-size:.7rem;color:var(--muted);white-space:nowrap;min-width:72px;text-align:right}
+.dc{border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:6px;font-size:.79rem}
+.dc:last-child{margin-bottom:0}
+.dc.rdy{border-color:rgba(76,175,80,.5);background:rgba(76,175,80,.07)}
+.dc.miss{border-color:rgba(229,57,53,.4);background:rgba(229,57,53,.06)}
+.dnpc{font-weight:800;font-size:.7rem;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ditm{color:var(--muted);font-size:.76rem;line-height:1.6}.drwd{font-weight:700;font-size:.77rem;margin-top:4px}
+.ch2{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 10px;border-radius:7px;margin-bottom:4px;font-size:.79rem;gap:8px}
+.ch2:last-child{margin-bottom:0}
+.c-done{background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.2)}
+.c-prog{background:rgba(255,152,0,.1);border:1px solid rgba(255,152,0,.2)}
+.c-todo{background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.15)}
+.btn{border:none;border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-g{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a0a00}
+.btn-g:hover{box-shadow:0 0 14px rgba(245,197,24,.4);transform:translateY(-1px)}
+.btn-ai{background:linear-gradient(135deg,#6a1b9a,var(--purple));color:#fff}
+.btn-ai:hover{box-shadow:0 0 14px rgba(171,71,188,.4);transform:translateY(-1px)}
+.btn-gh{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)}
+.btn-gh:hover{background:rgba(255,255,255,.09);color:var(--text)}
+.btn:active{transform:translateY(0)!important}.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-sm{padding:5px 12px;font-size:.72rem}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(245,197,24,.2);border-top-color:var(--gold);border-radius:50%;animation:rot .6s linear infinite;vertical-align:middle;margin-right:4px}
+.big-spin{width:44px;height:44px;border-width:3px;margin:0 auto 18px;display:block}
+@keyframes rot{to{transform:rotate(360deg)}}
+.fhead{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;flex-wrap:wrap;gap:14px}
+.favt{width:60px;height:60px;border-radius:10px;border:2px solid rgba(245,197,24,.15);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0}
+.fname{font-family:'Press Start 2P',monospace;font-size:.8rem;color:var(--gold);text-shadow:0 0 10px rgba(245,197,24,.3);margin-bottom:5px}
+.fmeta{font-size:.73rem;color:var(--muted);line-height:1.8}
+.fstats{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}
+.fs{text-align:center}.fsv{font-size:1.05rem;font-weight:800;color:var(--gold)}
+.fsl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.ai-out{background:rgba(0,0,0,.4);border:1px solid rgba(171,71,188,.2);border-radius:9px;padding:13px;font-size:.83rem;line-height:1.75;min-height:80px;white-space:pre-wrap}
+.loading{text-align:center;padding:80px 20px}
+.scroll{max-height:300px;overflow-y:auto}.scroll::-webkit-scrollbar{width:3px}.scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px}
+.inv-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.77rem;display:flex;align-items:center;gap:7px}
+.inv-item .qty{margin-left:auto;font-weight:800;color:var(--gold)}
+@media(max-width:600px){.fstats{display:none}main{padding:10px}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">🌻 SFL · Land #5062</div>
+  <div class="nav-r">
+    <span class="sbadge" id="badge">Connecting…</span>
+    <button class="btn btn-g btn-sm" id="refBtn" onclick="loadFarm()">⚡ Refresh</button>
+    <button class="btn btn-ai btn-sm" onclick="goTab('advisor')">🤖 AI</button>
+  </div>
+</nav>
+<div class="tabs">
+  <div class="tab active" data-tab="info"       onclick="goTab('info',this)">📋 Info</div>
+  <div class="tab"        data-tab="inventory"  onclick="goTab('inventory',this)">🎒 Inventory</div>
+  <div class="tab"        data-tab="resources"  onclick="goTab('resources',this)">⛏️ Resources</div>
+  <div class="tab"        data-tab="crops"      onclick="goTab('crops',this)">🌾 Crops</div>
+  <div class="tab"        data-tab="deliveries" onclick="goTab('deliveries',this)">📦 Deliveries</div>
+  <div class="tab"        data-tab="chores"     onclick="goTab('chores',this)">✅ Chores</div>
+  <div class="tab"        data-tab="advisor"    onclick="goTab('advisor',this)">🤖 AI</div>
+</div>
+<main>
+  <div id="loading" class="loading">
+    <span class="spin big-spin"></span>
+    <div style="color:var(--muted)">Loading live farm data…</div>
+  </div>
+  <div id="errBox" style="display:none;background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);border-radius:10px;padding:14px;margin-bottom:14px;font-size:.83rem;color:#ef9a9a"></div>
+  <div id="dash" style="display:none">
+    <div id="tab-info" class="section active">
+      <div class="fhead">
+        <div class="favt">👨‍🌾</div>
+        <div><div class="fname" id="hName">—</div><div class="fmeta" id="hMeta">—</div></div>
+        <div class="fstats">
+          <div class="fs"><div class="fsv" id="hCoins">—</div><div class="fsl">🪙 Coins</div></div>
+          <div class="fs"><div class="fsv" id="hBal">—</div><div class="fsl">🌸 Flower</div></div>
+          <div class="fs"><div class="fsv" id="hLevel">—</div><div class="fsl">⭐ Level</div></div>
+          <div class="fs"><div class="fsv" id="hXP">—</div><div class="fsl">XP</div></div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="ch">📊 Farm Stats</div><div class="cb" id="statsPanel">—</div></div>
+        <div class="card"><div class="ch">🚨 Urgent Actions <span id="urgBadge" class="badge bbad">…</span></div><div class="cb scroll" id="urgPanel">—</div></div>
+        <div class="card"><div class="ch">🐾 Pets</div><div class="cb" id="petsPanel">—</div></div>
+        <div class="card"><div class="ch">🏭 Production</div><div class="cb" id="prodPanel">—</div></div>
+      </div>
+    </div>
+    <div id="tab-inventory" class="section">
+      <div class="card full">
+        <div class="ch">🎒 Inventory <span id="invCount" class="badge bgold">…</span></div>
+        <div class="cb">
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px" id="invFilters"></div>
+          <div class="inv-grid" id="invGrid">—</div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-resources" class="section">
+      <div class="grid">
+        <div class="card full"><div class="ch">⛏️ Overview</div><div class="cb" id="resPanel">—</div></div>
+        <div class="card"><div class="ch">🌲 Trees</div><div class="cb scroll" id="treesPanel">—</div></div>
+        <div class="card"><div class="ch">🪨 Rocks & Minerals</div><div class="cb scroll" id="rocksPanel">—</div></div>
+      </div>
+    </div>
+    <div id="tab-crops" class="section">
+      <div class="grid">
+        <div class="card full"><div class="ch">🌾 Crop Plots <span id="cropCount" class="badge bgold">…</span></div><div class="cb" id="cropsPanel">—</div></div>
+        <div class="card full"><div class="ch">🍊 Fruit Patches</div><div class="cb" id="fruitsPanel">—</div></div>
+      </div>
+    </div>
+    <div id="tab-deliveries" class="section">
+      <div class="grid">
+        <div class="card"><div class="ch">📦 Deliveries <span id="delivBadge" class="badge bok">…</span></div><div class="cb scroll" id="delivPanel">—</div></div>
+        <div class="card"><div class="ch">🏴‍☠️ Bounties <span id="bountyBadge" class="badge bgold">…</span></div><div class="cb" id="bountyPanel">—</div></div>
+      </div>
+    </div>
+    <div id="tab-chores" class="section">
+      <div class="card full">
+        <div class="ch">📋 Weekly Chores <span id="choreBadge" class="badge bgold">…</span></div>
+        <div class="cb">
+          <div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);margin-bottom:3px"><span>Progress</span><span id="choreInfo">—</span></div>
+            <div class="pb"><div class="pf pf-gold" id="choreBar" style="width:0%"></div></div>
+          </div>
+          <div id="choresList">—</div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-advisor" class="section">
+      <div class="card full" style="border-color:rgba(171,71,188,.25)">
+        <div class="ch" style="background:linear-gradient(135deg,rgba(74,20,140,.4),var(--panel2));border-bottom-color:rgba(171,71,188,.3);color:#ce93d8">🤖 AI Farm Advisor — Live Analysis</div>
+        <div class="cb">
+          <div id="aiOut" class="ai-out"><span style="color:var(--muted);font-style:italic">Choose an option to get personalized advice based on your live farm data.</span></div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+            <button class="btn btn-ai" onclick="askAI('now')">⚡ What To Do Now</button>
+            <button class="btn btn-ai" onclick="askAI('profit')">💰 Max Profit</button>
+            <button class="btn btn-ai" onclick="askAI('chores')">📋 Complete Chores</button>
+            <button class="btn btn-ai" onclick="askAI('flower')">🌸 Maximize Flower</button>
+            <button class="btn btn-ai" onclick="askAI('spend')">🪙 Spend Less</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+// SERVER points to itself when hosted online
+const SERVER = window.location.origin;
+let D=null,_timers=[],_timerLoop=null;
+
+function goTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const sec=document.getElementById('tab-'+name);if(sec)sec.classList.add('active');
+  if(el)el.classList.add('active');
+  else{const t=document.querySelector('.tab[data-tab="'+name+'"]');if(t)t.classList.add('active');}
+}
+async function loadFarm(){
+  const btn=document.getElementById('refBtn'),badge=document.getElementById('badge');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>Loading…';
+  badge.className='sbadge';badge.textContent='Loading…';
+  document.getElementById('errBox').style.display='none';
+  try{
+    const res=await fetch(SERVER+'/farm',{signal:AbortSignal.timeout(15000)});
+    const text=await res.text();
+    let json;try{json=JSON.parse(text);}catch(e){throw new Error('Bad response: '+text.slice(0,100));}
+    if(json.error)throw new Error(json.error);
+    D=json;renderAll(D);
+    badge.className='sbadge live';badge.textContent='🟢 Live · '+new Date().toLocaleTimeString();
+    document.getElementById('loading').style.display='none';
+    document.getElementById('dash').style.display='block';
+  }catch(e){
+    document.getElementById('loading').style.display='none';
+    document.getElementById('dash').style.display='block';
+    const eb=document.getElementById('errBox');eb.style.display='block';
+    eb.innerHTML='⚠️ <strong>Error loading data:</strong> '+e.message;
+    badge.className='sbadge err';badge.textContent='🔴 Error';
+  }
+  btn.disabled=false;btn.innerHTML='⚡ Refresh';
+}
+function fmt(n){return n!=null?Number(n).toLocaleString(undefined,{maximumFractionDigits:2}):'—';}
+function fmtMs(ms){
+  if(ms<=0)return '✅ Ready!';
+  const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60),d=Math.floor(h/24);
+  if(d>0)return d+'d '+(h%24)+'h';if(h>0)return h+'h '+(m%60)+'m';
+  if(m>0)return m+'m '+(s%60)+'s';return s+'s';
+}
+function row(l,v,cls){return '<div class="row"><span class="rl">'+l+'</span><span class="rv '+(cls||'')+'">'+( v??'—')+'</span></div>';}
+function canFulfil(o,inv){if(!o.items)return false;return Object.entries(o.items).every(([k,q])=>parseFloat(inv[k]||0)>=q);}
+const ICONS={Wood:'🪵',Stone:'🪨',Iron:'⚙️',Gold:'🥇',Crimstone:'💠',Sunstone:'🌟',Oil:'🛢️',Egg:'🥚',Milk:'🥛',Honey:'🍯',Wool:'🧶',Feather:'🪶',Leather:'🧴','Merino Wool':'🧸',Apple:'🍎',Orange:'🍊',Lemon:'🍋',Blueberry:'🫐',Banana:'🍌',Tomato:'🍅',Grape:'🍇',Celestine:'🌺',Axe:'🪓',Pickaxe:'⛏️',Rod:'🎣','Oil Drill':'🔩',Sunflower:'🌻',Potato:'🥔',Pumpkin:'🎃',Carrot:'🥕',Cabbage:'🥬',Beetroot:'🍠',Cauliflower:'🥦',Eggplant:'🍆',Corn:'🌽',Radish:'🔴',Wheat:'🌾',Kale:'🥗',Parsnip:'🌿',Soybean:'🫘',Rhubarb:'🫚',Zucchini:'🥒',Coins:'🪙',Flower:'🌸'};
+const CATS={'Crops':['Sunflower','Potato','Pumpkin','Carrot','Cabbage','Beetroot','Cauliflower','Eggplant','Corn','Radish','Wheat','Kale','Parsnip','Soybean','Rhubarb','Zucchini','Broccoli','Pepper','Onion','Turnip','Yam','Artichoke','Barley'],'Resources':['Wood','Stone','Iron','Gold','Crimstone','Sunstone','Oil'],'Animals':['Egg','Milk','Honey','Wool','Feather','Leather','Merino Wool'],'Fruits':['Apple','Orange','Lemon','Blueberry','Banana','Tomato','Grape','Celestine','Lunara','Duskberry'],'Seeds':['Sunflower Seed','Potato Seed','Pumpkin Seed','Carrot Seed','Cabbage Seed','Beetroot Seed','Cauliflower Seed','Eggplant Seed','Corn Seed','Radish Seed','Wheat Seed','Kale Seed','Parsnip Seed','Soybean Seed','Rhubarb Seed'],'Tools':['Axe','Pickaxe','Stone Pickaxe','Iron Pickaxe','Gold Pickaxe','Rod','Oil Drill','Sand Shovel','Sand Drill']};
+let curFilter='All';
+function renderAll(d){
+  const farm=d.farm||d,inv=farm.inventory||{},bump=farm.bumpkin||{},act=bump.activity||{};
+  const coins=parseFloat(farm.coins||0),bal=parseFloat(farm.balance||0),level=bump.level||0,xp=bump.experience||0;
+  document.getElementById('hName').textContent='Mineroboy';
+  document.getElementById('hMeta').textContent='Land #5062 · Level '+level+' · '+fmt(xp)+' XP';
+  document.getElementById('hCoins').textContent=fmt(coins);
+  document.getElementById('hBal').textContent=bal.toFixed(3);
+  document.getElementById('hLevel').textContent=level;
+  document.getElementById('hXP').textContent=fmt(xp);
+  document.getElementById('statsPanel').innerHTML=[row('🪙 Coins',fmt(coins),'gold'),row('🌸 Flower',bal.toFixed(4),'gold'),row('⭐ Level',level,'grn'),row('✨ XP',fmt(xp),'blu'),row('🪙 Coins Earned',fmt(act['Coins Earned']),'grn'),row('🪙 Coins Spent',fmt(act['Coins Spent']),'ora'),row('🌻 Sunflowers',fmt(act['Sunflower Harvested']),''),row('🥚 Eggs',fmt(act['Egg Collected']),''),row('🌲 Trees Chopped',fmt(act['Tree Chopped']),''),row('🪨 Stone Mined',fmt(act['Stone Mined']),''),row('⚙️ Iron Mined',fmt(act['Iron Mined']),''),row('🥇 Gold Mined',fmt(act['Gold Mined']),'')].join('');
+  renderUrgent(farm);renderPets(farm);renderProduction(farm);
+  renderInventory(inv);renderResources(farm);renderCrops(farm);renderDeliveries(farm);renderChores(farm);
+}
+function renderUrgent(farm){
+  const now=Date.now(),inv=farm.inventory||{},items=[];
+  const rT=Object.values(farm.trees||{}).filter(t=>t.wood?.choppedAt&&(now-t.wood.choppedAt)>=4*3600*1000).length;if(rT>0)items.push({c:'al-w',t:'🌲 <strong>'+rT+' trees</strong> ready to chop!'});
+  const rS=Object.values(farm.stones||{}).filter(s=>s.stone?.minedAt&&(now-s.stone.minedAt)>=4*3600*1000).length;if(rS>0)items.push({c:'al-w',t:'🪨 <strong>'+rS+' stones</strong> ready!'});
+  const rI=Object.values(farm.iron||{}).filter(i=>i.stone?.minedAt&&(now-i.stone.minedAt)>=12*3600*1000).length;if(rI>0)items.push({c:'al-w',t:'⚙️ <strong>'+rI+' iron</strong> ready!'});
+  const rG=Object.values(farm.gold||{}).filter(g=>g.stone?.minedAt&&(now-g.stone.minedAt)>=24*3600*1000).length;if(rG>0)items.push({c:'al-b',t:'🥇 <strong>'+rG+' gold</strong> ready!'});
+  const rC=Object.values(farm.crops||{}).filter(c=>c.crop?.readyAt&&now>=c.crop.readyAt).length;if(rC>0)items.push({c:'al-w',t:'🌾 <strong>'+rC+' crops</strong> ready!'});
+  const rO=(farm.delivery?.orders||[]).filter(o=>!o.completedAt&&canFulfil(o,inv));if(rO.length>0)items.push({c:'al-ok',t:'📦 <strong>'+rO.length+' deliveries</strong> ready! ('+rO.map(o=>o.from).join(', ')+')'});
+  if(items.length===0)items.push({c:'al-ok',t:'✅ Nothing urgent right now!'});
+  document.getElementById('urgPanel').innerHTML=items.map(i=>'<div class="al '+i.c+'">'+i.t+'</div>').join('');
+  const bc=items.filter(i=>i.c==='al-b').length,wc=items.filter(i=>i.c==='al-w').length;
+  document.getElementById('urgBadge').textContent=bc+wc||'✓';
+  document.getElementById('urgBadge').className='badge '+(bc?'bbad':wc?'bwarn':'bok');
+}
+function renderPets(farm){
+  const e=Object.entries(farm.pets||{});
+  document.getElementById('petsPanel').innerHTML=e.length?e.map(([n,p])=>'<div style="margin-bottom:9px;padding:9px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px"><div style="font-weight:800;margin-bottom:3px">'+n+' <span class="badge bgold">Lv '+(p.level||'?')+'</span></div><div style="font-size:.73rem;color:var(--muted)">XP: '+fmt(p.experience)+' · Mood: '+(p.mood||'?')+'</div>'+(p.requests?p.requests.map(r=>'<div style="font-size:.75rem;margin-top:3px">🍽️ '+r.food+' ×'+r.quantity+'</div>').join(''):'')+'</div>').join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No pets.</div>';
+}
+function renderProduction(farm){
+  const now=Date.now(),rows=[];
+  Object.entries(farm.buildings||{}).forEach(([n,list])=>{(list||[]).forEach(b=>{if(b.crafting){const r=now>=b.crafting.readyAt;rows.push(row(n,r?'<span class="grn">✅ '+b.crafting.name+' ready!</span>':'<span class="ora">⏳ '+b.crafting.name+' '+fmtMs(b.crafting.readyAt-now)+'</span>'));}else rows.push(row(n,'<span style="color:var(--muted)">Idle</span>'));});});
+  document.getElementById('prodPanel').innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No building data.</div>';
+}
+function renderInventory(inv){
+  const items=Object.entries(inv).filter(([,v])=>parseFloat(v)>0).sort((a,b)=>parseFloat(b[1])-parseFloat(a[1]));
+  document.getElementById('invCount').textContent=items.length+' items';
+  const cats=['All',...Object.keys(CATS),'Other'];
+  document.getElementById('invFilters').innerHTML=cats.map(c=>'<button class="btn btn-sm '+(c===curFilter?'btn-g':'btn-gh')+'" onclick="filterInv(\''+c+'\')">'+c+'</button>').join('');
+  renderInvGrid(items);
+}
+function filterInv(cat){curFilter=cat;const inv=(D?.farm||D)?.inventory||{};const items=Object.entries(inv).filter(([,v])=>parseFloat(v)>0).sort((a,b)=>parseFloat(b[1])-parseFloat(a[1]));document.querySelectorAll('#invFilters .btn').forEach(b=>b.className='btn btn-sm '+(b.textContent===cat?'btn-g':'btn-gh'));renderInvGrid(items);}
+function renderInvGrid(items){const f=curFilter==='All'?items:curFilter==='Other'?items.filter(([k])=>!Object.values(CATS).flat().includes(k)):items.filter(([k])=>(CATS[curFilter]||[]).includes(k));document.getElementById('invGrid').innerHTML=f.length?f.map(([k,v])=>'<div class="inv-item"><span>'+(ICONS[k]||'📦')+'</span><span style="font-size:.77rem">'+k+'</span><span class="qty">'+fmt(parseFloat(v))+'</span></div>').join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem;padding:8px">Nothing here.</div>';}
+function renderResources(farm){
+  const now=Date.now();_timers=[];
+  const trees=Object.entries(farm.trees||{});
+  const tR=trees.map(([id,t])=>{if(!t.wood?.choppedAt)return null;const ra=t.wood.choppedAt+4*3600*1000,rdy=now>=ra,idx=_timers.length;_timers.push({readyAt:ra,el:'tr-'+idx,bar:'tb-'+idx,badge:'tk-'+idx,type:'tree'});const p=rdy?100:Math.max(3,Math.round(((now-t.wood.choppedAt)/(4*3600*1000))*100));return '<div class="ti"><span>🌲</span><div class="tw"><div class="th"><span style="font-weight:700">Tree #'+(parseInt(id)+1)+'</span><span class="badge '+(rdy?'bok':'binfo')+'" id="tk-'+idx+'">'+(rdy?'✅':'⏳')+'</span></div><div class="pb"><div class="pf '+(rdy?'pf-gold':'pf-grn')+'" id="tb-'+idx+'" style="width:'+p+'%"></div></div></div><span class="tt" id="tr-'+idx+'">'+(rdy?'Chop!':fmtMs(ra-now))+'</span></div>';}).filter(Boolean);
+  document.getElementById('treesPanel').innerHTML=tR.length?tR.join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No trees.</div>';
+  const rt=[{key:'stones',icon:'🪨',regen:4*3600*1000,label:'Stone'},{key:'iron',icon:'⚙️',regen:12*3600*1000,label:'Iron'},{key:'gold',icon:'🥇',regen:24*3600*1000,label:'Gold'},{key:'crimstones',icon:'💠',regen:48*3600*1000,label:'Crimstone'},{key:'sunstones',icon:'🌟',regen:72*3600*1000,label:'Sunstone'}];
+  const rR=[];rt.forEach(r=>{Object.entries(farm[r.key]||{}).forEach(([id,rock])=>{const ma=rock.stone?.minedAt||rock.minedAt;if(!ma)return;const ra=ma+r.regen,rdy=now>=ra,idx=_timers.length;_timers.push({readyAt:ra,el:'rr-'+idx,bar:'rb-'+idx,badge:'rk-'+idx,type:'rock'});const p=rdy?100:Math.max(3,Math.round(((now-ma)/r.regen)*100));rR.push('<div class="ti"><span>'+r.icon+'</span><div class="tw"><div class="th"><span style="font-weight:700">'+r.label+'</span><span class="badge '+(rdy?'bok':'binfo')+'" id="rk-'+idx+'">'+(rdy?'✅':'⏳')+'</span></div><div class="pb"><div class="pf '+(rdy?'pf-gold':'pf-grn')+'" id="rb-'+idx+'" style="width:'+p+'%"></div></div></div><span class="tt" id="rr-'+idx+'">'+(rdy?'Mine!':fmtMs(ra-now))+'</span></div>');});});
+  document.getElementById('rocksPanel').innerHTML=rR.length?rR.join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No rocks.</div>';
+  document.getElementById('resPanel').innerHTML='<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:.83rem"><div class="al al-i" style="flex:1;min-width:120px">🌲 Trees: <strong>'+trees.length+'</strong></div><div class="al al-i" style="flex:1;min-width:120px">🪨 Stones: <strong>'+Object.keys(farm.stones||{}).length+'</strong></div><div class="al al-i" style="flex:1;min-width:120px">⚙️ Iron: <strong>'+Object.keys(farm.iron||{}).length+'</strong></div><div class="al al-i" style="flex:1;min-width:120px">🥇 Gold: <strong>'+Object.keys(farm.gold||{}).length+'</strong></div><div class="al al-i" style="flex:1;min-width:120px">💠 Crimstone: <strong>'+Object.keys(farm.crimstones||{}).length+'</strong></div></div>';
+  if(_timerLoop)clearInterval(_timerLoop);
+  _timerLoop=setInterval(()=>{const now=Date.now();_timers.forEach(t=>{const ms=t.readyAt-now,el=document.getElementById(t.el),bar=document.getElementById(t.bar),badge=document.getElementById(t.badge);if(el)el.textContent=ms<=0?(t.type==='tree'?'Chop!':'Mine!'):fmtMs(ms);if(ms<=0){if(bar){bar.classList.remove('pf-grn');bar.classList.add('pf-gold');bar.style.width='100%';}if(badge){badge.className='badge bok';badge.textContent='✅';}}});},1000);
+}
+function renderCrops(farm){
+  const now=Date.now(),crops=Object.entries(farm.crops||{});
+  document.getElementById('cropCount').textContent=crops.length+' plots';
+  const g={};crops.forEach(([,c])=>{if(!c.crop)return;const n=c.crop.name,r=c.crop.readyAt&&now>=c.crop.readyAt,k=n+(r?'_r':'_g');if(!g[k])g[k]={name:n,ready:r,count:0,next:Infinity};g[k].count++;if(!r&&c.crop.readyAt)g[k].next=Math.min(g[k].next,c.crop.readyAt);});
+  const rows=Object.values(g).sort((a,b)=>a.ready===b.ready?0:a.ready?-1:1).map(x=>'<div class="ch2 '+(x.ready?'c-done':'c-prog')+'"><div>'+(x.ready?'✅':'⏳')+' '+(ICONS[x.name]||'🌱')+' <strong>'+x.name+'</strong> ×'+x.count+'</div><span class="badge '+(x.ready?'bok':'bwarn')+'">'+(x.ready?'Harvest!':fmtMs(x.next-now))+'</span></div>');
+  document.getElementById('cropsPanel').innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No active crops.</div>';
+  const fr=Object.entries(farm.fruitPatches||{}).map(([,f])=>{if(!f.fruit)return null;const n=f.fruit.name,hl=f.fruit.harvestsLeft||0,lh=f.fruit.harvestedAt||0,ra=lh+48*3600*1000,r=hl>0&&now>=ra;return '<div class="ch2 '+(r?'c-done':hl>0?'c-prog':'c-todo')+'"><div>'+(r?'✅':hl>0?'⏳':'❌')+' '+(ICONS[n]||'🍓')+' <strong>'+n+'</strong> — '+hl+' left</div><span class="badge '+(r?'bok':hl>0?'bwarn':'bbad')+'">'+(r?'Pick!':hl>0?fmtMs(ra-now):'Depleted')+'</span></div>';}).filter(Boolean);
+  document.getElementById('fruitsPanel').innerHTML=fr.length?fr.join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No fruit patches.</div>';
+}
+function renderDeliveries(farm){
+  const inv=farm.inventory||{},orders=(farm.delivery?.orders||[]).filter(o=>!o.completedAt);
+  const rdy=orders.filter(o=>canFulfil(o,inv)),miss=orders.filter(o=>!canFulfil(o,inv));
+  document.getElementById('delivBadge').textContent=rdy.length+' ready · '+miss.length+' missing';
+  document.getElementById('delivPanel').innerHTML=[...rdy,...miss].length?[...rdy,...miss].map(o=>{const isR=canFulfil(o,inv),il=Object.entries(o.items||{}).map(([k,q])=>{const h=parseFloat(inv[k]||0);return (ICONS[k]||'📦')+' '+k+' ×'+q+' <span style="color:'+(h>=q?'#a5d6a7':'#ef9a9a')+'">(have '+fmt(h)+')</span>';}).join('<br>'),rw=o.reward?.coins?'🪙 '+fmt(o.reward.coins):o.reward?.sfl?'🌸 '+o.reward.sfl:'?';return '<div class="dc '+(isR?'rdy':'miss')+'"><div class="dnpc">'+(o.from||'NPC')+' '+(isR?'<span class="badge bok">✅ Ready</span>':'<span class="badge bbad">❌ Missing</span>')+'</div><div class="ditm">'+il+'</div><div class="drwd '+(isR?'grn':'ora')+'">'+rw+(isR?' → Deliver now!':'')+'</div></div>';}).join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No active deliveries.</div>';
+  const b=farm.bounties?.hints||farm.bounties||[];
+  document.getElementById('bountyBadge').textContent=Array.isArray(b)?b.length+' items':'?';
+  document.getElementById('bountyPanel').innerHTML=Array.isArray(b)&&b.length?b.slice(0,15).map(x=>{const nm=x.items?.name||x.name||'?',hv=parseFloat((farm.inventory||{})[nm]||0),nd=x.items?.amount||x.amount||1,ok=hv>=nd;return '<div class="ch2 '+(ok?'c-prog':'c-todo')+'"><span>'+(ok?'⚠️':'❌')+' '+nm+' ('+hv+'/'+nd+')</span><span class="badge bgold">🎫×'+(x.items?.reward||x.reward||'?')+'</span></div>';}).join(''):'<div style="color:var(--muted);font-style:italic;font-size:.8rem">No bounty data.</div>';
+}
+function renderChores(farm){
+  const ch=farm.chores;if(!ch){document.getElementById('choresList').innerHTML='<div style="color:var(--muted);font-style:italic;font-size:.8rem">No chore data in API.</div>';document.getElementById('choreBadge').textContent='N/A';return;}
+  const tasks=Object.entries(ch).filter(([k])=>k!=='weeklyChoresCompleted'),done=tasks.filter(([,c])=>c.completedAt).length,pct=tasks.length?Math.round((done/tasks.length)*100):0;
+  document.getElementById('choreBadge').textContent=pct+'%';document.getElementById('choreInfo').textContent=done+'/'+tasks.length;document.getElementById('choreBar').style.width=pct+'%';
+  document.getElementById('choresList').innerHTML=tasks.map(([id,c])=>{const d=!!c.completedAt,p=c.progress||0,r=c.requirement||1,p2=Math.min(100,Math.round((p/r)*100));return '<div class="ch2 '+(d?'c-done':p>0?'c-prog':'c-todo')+'"><div style="flex:1"><div>'+(d?'✅':p>0?'⚠️':'❌')+' '+(c.activity||id)+'</div>'+(!d?'<div class="pb" style="max-width:180px"><div class="pf pf-gold" style="width:'+p2+'%"></div></div><div style="font-size:.7rem;color:var(--muted)">'+fmt(p)+'/'+fmt(r)+'</div>':'')+'</div><span class="badge bgold" style="flex-shrink:0">🎫×'+(c.reward||'?')+'</span></div>';}).join('');
+}
+async function askAI(mode){
+  goTab('advisor');const el=document.getElementById('aiOut');el.innerHTML='<span class="spin"></span> Analyzing…';
+  const farm=D?.farm||D||{},inv=farm.inventory||{},bump=farm.bumpkin||{};
+  const coins=parseFloat(farm.coins||0),bal=parseFloat(farm.balance||0),now=Date.now();
+  const rC=Object.values(farm.crops||{}).filter(c=>c.crop?.readyAt&&now>=c.crop.readyAt).length;
+  const rT=Object.values(farm.trees||{}).filter(t=>t.wood?.choppedAt&&(now-t.wood.choppedAt)>=4*3600*1000).length;
+  const rS=Object.values(farm.stones||{}).filter(s=>s.stone?.minedAt&&(now-s.stone.minedAt)>=4*3600*1000).length;
+  const rO=(farm.delivery?.orders||[]).filter(o=>!o.completedAt&&canFulfil(o,inv));
+  const pO=(farm.delivery?.orders||[]).filter(o=>!o.completedAt&&!canFulfil(o,inv));
+  const ti=Object.entries(inv).filter(([,v])=>parseFloat(v)>0).sort((a,b)=>parseFloat(b[1])-parseFloat(a[1])).slice(0,25).map(([k,v])=>k+':'+Math.round(parseFloat(v))).join(', ');
+  const goals={now:'Tell me exactly what to do right now.',profit:'Best 24-hour profit plan.',chores:'Complete weekly chores efficiently.',flower:'Maximize Flower earnings.',spend:'Earn most while spending least.'};
+  const prompt='Sunflower Land advisor. LIVE farm data:\nMineroboy Land #5062\nCoins: '+fmt(coins)+' | Flower: '+bal.toFixed(4)+'\nLevel: '+bump.level+' | XP: '+fmt(bump.experience)+'\nCrops ready: '+rC+' | Trees ready: '+rT+' | Stones ready: '+rS+'\nDeliveries ready: '+rO.length+' ('+rO.map(o=>o.from).join(', ')+') | Missing: '+pO.length+'\nTop inventory: '+ti+'\nGOAL: '+goals[mode]+'\n6-8 numbered steps, specific items/numbers, emojis, end with 💡 Pro Tip.';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();el.textContent=(data.content||[]).map(b=>b.text||'').join('')||'No response.';
+  }catch(e){el.innerHTML='<span class="red">❌ '+e.message+'</span>';}
+}
+window.onload=loadFarm;
+</script>
+</body>
+</html>

@@ -1,15 +1,23 @@
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const API_KEY = 'sfl.NTA2Mg.ufGVWqh-nGGqWKNS90XeUYCvjL6xB-_mMreTkz6CIYg';
 const FARM_ID = '5062';
-const PORT = 3333;
+const PORT = process.env.PORT || 3333;
 
-function get(host, path, headers = {}) {
+function fetchFarm() {
   return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: host, path, method: 'GET',
-      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0', 'x-api-key': API_KEY, ...headers }
+      hostname: 'api.sunflower-land.com',
+      path: `/community/farms/${FARM_ID}`,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+        'x-api-key': API_KEY,
+      }
     }, (res) => {
       let body = '';
       res.on('data', c => body += c);
@@ -22,26 +30,48 @@ function get(host, path, headers = {}) {
 }
 
 const server = http.createServer(async (req, res) => {
+  // CORS — allow any origin so dashboard can call this from anywhere
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Content-Type', 'application/json');
-  if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
-  if (req.url === '/ping') { res.writeHead(200); res.end(JSON.stringify({ ok: true })); return; }
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 
-  if (req.url === '/farm') {
-    console.log('[' + new Date().toLocaleTimeString() + '] Fetching farm data...');
+  if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
+
+  const url = req.url.split('?')[0];
+
+  // Serve dashboard HTML
+  if (url === '/' || url === '/index.html') {
     try {
-      const r = await get('api.sunflower-land.com', `/community/farms/${FARM_ID}`);
-      if (r.status === 200) {
-        console.log('  OK - ' + r.body.length + ' bytes');
-        res.writeHead(200);
-        res.end(r.body);
-      } else {
-        console.log('  Error status: ' + r.status);
-        res.writeHead(r.status);
-        res.end(r.body);
-      }
+      const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+      res.setHeader('Content-Type', 'text/html');
+      res.writeHead(200);
+      res.end(html);
     } catch(e) {
-      console.log('  Error: ' + e.message);
+      res.writeHead(500);
+      res.end('Dashboard file not found');
+    }
+    return;
+  }
+
+  // Health check
+  if (url === '/ping') {
+    res.setHeader('Content-Type', 'application/json');
+    res.writeHead(200);
+    res.end(JSON.stringify({ ok: true, time: new Date().toISOString() }));
+    return;
+  }
+
+  // Farm data API
+  if (url === '/farm') {
+    res.setHeader('Content-Type', 'application/json');
+    console.log('[' + new Date().toLocaleTimeString() + '] Fetching farm...');
+    try {
+      const r = await fetchFarm();
+      console.log('  Status:', r.status, '— bytes:', r.body.length);
+      res.writeHead(r.status);
+      res.end(r.body);
+    } catch(e) {
+      console.error('  Error:', e.message);
       res.writeHead(500);
       res.end(JSON.stringify({ error: e.message }));
     }
@@ -53,7 +83,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('\n🌻 SFL Dashboard Server running!');
-  console.log('   Farm API: http://localhost:' + PORT + '/farm');
-  console.log('   Keep this window open.\n');
+  console.log('');
+  console.log('🌻 SFL Dashboard running on port', PORT);
+  console.log('');
 });
